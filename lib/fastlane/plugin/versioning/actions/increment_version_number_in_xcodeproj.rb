@@ -91,7 +91,7 @@ module Fastlane
           project = Xcodeproj::Project.open(params[:xcodeproj])
           configs = project.objects.select { |obj| select_build_configuration_predicate(params[:build_configuration_name], obj) }
           configs.each do |config|
-            config.build_settings["MARKETING_VERSION"] = next_version_number
+            config.build_settings["APP_VERSION"] = next_version_number
           end
           project.save
       end
