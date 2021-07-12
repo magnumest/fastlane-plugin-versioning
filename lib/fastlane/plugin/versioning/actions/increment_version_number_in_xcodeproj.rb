@@ -40,7 +40,7 @@ module Fastlane
 
         if params[:target]
           set_version_number_using_target(params, next_version_number)
-        elsif params[:build_configuration_name] && params[:scheme]
+        elsif params[:build_configuration_name] || params[:build_configuration_list] && params[:scheme]
           set_version_number_using_scheme(params, next_version_number)
         else
           set_all_xcodeproj_version_numbers(params, next_version_number)
@@ -87,12 +87,24 @@ module Fastlane
         project.save
       end
 
+      def self.update_build_configuration(project, buildConfig, variable_name, next_version_number)
+        configs = project.objects.select { |obj| select_build_configuration_predicate(buildConfig, obj) }
+        configs.each do |config|
+          config.build_settings[variable_name] = next_version_number
+        end
+      end
+
       def self.set_version_number_using_scheme(params, next_version_number)
           project = Xcodeproj::Project.open(params[:xcodeproj])
           variable_name = params[:variable_name] || "MARKETING_VERSION"
-          configs = project.objects.select { |obj| select_build_configuration_predicate(params[:build_configuration_name], obj) }
-          configs.each do |config|
-            config.build_settings[variable_name] = next_version_number
+          config_list = params[:build_configuration_list]
+          if config_list
+            config_list.each do |buildConfig|
+              update_build_configuration(project, buildConfig, variable_name, next_version_number)
+            end                
+          else
+            buildConfig = params[:build_configuration_name]
+            update_build_configuration(project, buildConfig, variable_name, next_version_number)
           end
           project.save
       end
@@ -167,7 +179,12 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :variable_name,
                          optional: true,
                          description: "The user defined variable to use when setting the version. Defaults to 'MARKETING_VERSION'",
-                         default_value: "MARKETING_VERSION")
+                         default_value: "MARKETING_VERSION"),
+          FastlaneCore::ConfigItem.new(key: :build_configuration_list,
+                          optional: true,
+                          type: Array,
+                          conflicting_options: [:build_configuration_name],
+                          description: "Specify a comma separated list of build configurations"),
         ]
       end
 
