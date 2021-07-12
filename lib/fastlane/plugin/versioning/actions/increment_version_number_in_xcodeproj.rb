@@ -89,9 +89,10 @@ module Fastlane
 
       def self.set_version_number_using_scheme(params, next_version_number)
           project = Xcodeproj::Project.open(params[:xcodeproj])
+          variable_name = params[:variable_name] || "MARKETING_VERSION"
           configs = project.objects.select { |obj| select_build_configuration_predicate(params[:build_configuration_name], obj) }
           configs.each do |config|
-            config.build_settings["APP_VERSION"] = next_version_number
+            config.build_settings[variable_name] = next_version_number
           end
           project.save
       end
@@ -162,7 +163,11 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :plist_build_setting_support,
                          description: "support automatic resolution of build setting from xcodeproj if not a literal value in the plist",
                          is_string: false,
-                         default_value: false)
+                         default_value: false),
+          FastlaneCore::ConfigItem.new(key: :variable_name,
+                         optional: true,
+                         description: "The user defined variable to use when setting the version. Defaults to 'MARKETING_VERSION'",
+                         default_value: "MARKETING_VERSION")
         ]
       end
 
