@@ -57,6 +57,13 @@ increment_version_number_in_plist(
   # Automatically increment patch version number. Use App Store version number as a source.
   version_source: 'appstore'
 )
+increment_version_number_in_plist(
+  # Automatically increment patch version number. Use App Store version number as a source.
+  version_source: 'appstore',
+  # optional two letter country code: 
+  # specify if availability of your app is limited to a certain country
+  country: 'at'
+)
 
 increment_version_number_in_plist(
   # specify specific version number (optional, omitting it increments patch version number)
@@ -108,12 +115,27 @@ version = get_version_number_from_plist(xcodeproj: 'Project.xcodeproj', # option
 
 ```ruby
 version = get_app_store_version_number(xcodeproj: 'Project.xcodeproj', # optional
-                                        target: 'TestTarget', # optional, or `scheme`
-                                        # optional, must be specified if you have different Info.plist build settings
-                                        # for different build configurations
-                                        build_configuration_name: 'Release')
-)
+                                       target: 'TestTarget', # optional, or `scheme`
+                                       # optional, must be specified if you have different Info.plist build settings
+                                       # for different build configurations
+                                       build_configuration_name: 'Release')
+
+version = get_app_store_version_number(xcodeproj: 'Project.xcodeproj', # optional
+                                       target: 'TestTarget', # optional, or `scheme`
+                                       # optional, must be specified if you have different Info.plist build settings
+                                       # for different build configurations
+                                       build_configuration_name: 'Release',
+                                       # optional, must be specified for the lookup to succeed, 
+                                       # if your app is only published to one country 
+                                       # passed value must be a country code
+                                       country: 'at')
+
 version = get_app_store_version_number(bundle_id: 'com.apple.Numbers')
+
+version = get_app_store_version_number(bundle_id: 'com.apple.Numbers',
+                                       # optional two letter country code: 
+                                       # specify if availability of your app is limited to a certain country
+                                       country: 'at')
 
 ```
 
@@ -204,6 +226,13 @@ increment_version_number_in_xcodeproj(
   # Automatically increment patch version number. Use App Store version number as a source.
   version_source: 'appstore'
 )
+increment_version_number_in_xcodeproj(
+  # Automatically increment patch version number. Use App Store version number as a source.
+  version_source: 'appstore',
+  # optional two letter country code: 
+  # specify if availability of your app is limited to a certain country
+  country: 'at'
+)
 
 increment_version_number_in_xcodeproj(
   # specify specific version number (optional, omitting it increments patch version number)
@@ -272,6 +301,14 @@ increment_build_number_in_plist(
 
 
 ## Issues and Feedback
+
+### SwiftPM
+
+SwiftPM can be tedious when using this plugin, at least in terms of git history and `xcodeproj`s. Up until recently, there were a number of annoyances caused by this plugin (and a downstream dependency of it) because writing to a project file would clobber some of the comment metadata inside of the project file and replace them - leaving you with the actual version change, but a number of other, less desirable changes too to hand pick through (or give up this plugin for). The advice is, update to `>= 0.4.6` of this plugin, and follow [this advice](https://github.com/SiarheiFedartsou/fastlane-plugin-versioning/issues/59#issuecomment-878255057) - which is to make sure not to include the `.git` at the end of your SwiftPM dependency URLs.
+
+### New / Fresh projects
+
+Note that you will need to set the build and version numbers through Xcode's UI at least once to use this plugin without weird `nil:NilClass` issues. See this [issue](https://github.com/SiarheiFedartsou/fastlane-plugin-versioning/issues/60) for context
 
 For any other issues and feedback about this plugin, please submit it to this repository.
 
